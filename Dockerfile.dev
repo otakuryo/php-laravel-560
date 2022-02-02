@@ -1,0 +1,34 @@
+# Composer with php 7.4.1
+FROM composer@sha256:ac3df9eeae42da964b8740efe83e7a4dee4843f6c740a02dfbb8e689dc7f32b6 
+
+RUN apk add npm zlib-dev libpng-dev && docker-php-ext-configure gd && docker-php-ext-install -j$(nproc) gd
+
+RUN docker-php-ext-install mysqli
+
+RUN npm install -g yarn
+
+WORKDIR /app
+
+RUN composer create-project laravel/laravel="5.6.*" .
+
+COPY ./composer.json ./
+
+COPY ./composer.lock ./
+
+COPY ./.env ./
+
+COPY ./package.json ./
+
+RUN composer install -v
+
+RUN docker-php-ext-install pdo_mysql
+
+RUN php artisan key:generate --verbose
+
+RUN php artisan config:cache
+
+RUN yarn
+
+RUN echo "Artisan: 0.0.0.0:4001, mariaDB: 0.0.0.0:3006"  
+
+CMD ["php", "artisan", "serve", "--host", "0.0.0.0", "--port", "4000", "--verbose"]

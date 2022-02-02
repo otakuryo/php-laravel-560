@@ -1,0 +1,28 @@
+version: "3"
+services:
+  adn-laravel-5.60:
+    env_file: .env
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    depends_on:
+      - mysql-dev
+    ports: 
+      - 4001:4000
+      - 4002:4002
+    restart: unless-stopped
+    volumes:
+      - /app/node_modules
+      - /app/vendor
+      - .:/app
+  mysql-dev:
+    image: mariadb:10.4
+    env_file: .env
+    ports:
+      - 3366:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_DATABASE}
+    volumes:
+      - ./mysql-dev-volume:/var/lib/mysql
+    restart: unless-stopped
